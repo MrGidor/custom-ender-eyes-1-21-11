@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.EnderSignal;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
@@ -13,56 +12,50 @@ import me.wholesome_seal.custom_ender_eyes.Main;
 import me.wholesome_seal.custom_ender_eyes.structure.WayPointBuilder;
 
 public class EnderEyeRedirect implements Listener {
-    private Main plugin;
-    private FileConfiguration config;
+    private final Main plugin;
 
     public EnderEyeRedirect(Main plugin) {
         this.plugin = plugin;
-        this.config = this.plugin.getConfig();
-
         this.plugin.getServer().getPluginManager().registerEvents(this, this.plugin);
     }
-    
+
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
-        if (this.config.getBoolean("target-strongholds")) return;
-        if (!event.getEntityType().equals(EntityType.ENDER_PEARL)) return;
+        if (!(event.getEntity() instanceof EnderSignal enderEye)) return;
 
+        FileConfiguration config = this.plugin.getConfig();
+        if (config.getBoolean("target-strongholds")) return;
+
+        World world = enderEye.getWorld();
         String waypointStoragePath;
-        switch(event.getEntity().getWorld().getEnvironment()) {
-            case NETHER: {
+        switch (world.getEnvironment()) {
+            case NETHER -> {
+                if (!config.getBoolean("allow-nether")) return;
                 waypointStoragePath = "waypoint.nether";
-                if (this.config.getBoolean("allow-nether")) break; 
-                return;
             }
-            case THE_END: {
+            case THE_END -> {
+                if (!config.getBoolean("allow-end")) return;
                 waypointStoragePath = "waypoint.end";
-                if (this.config.getBoolean("allow-end")) break;
-                return;
             }
-            default: {
-                waypointStoragePath = "waypoint.overworld";
-                break;
-            }
+            default -> waypointStoragePath = "waypoint.overworld";
         }
 
-        Location eventLocation = event.getLocation();
-        World eventWorld = event.getEntity().getWorld();
+        Location origin = enderEye.getLocation();
 
         WayPointBuilder nearestWaypoint = null;
         double nearestYet = Double.MAX_VALUE;
         for (WayPointBuilder waypoint : WayPointBuilder.getWayPoint(waypointStoragePath)) {
-            Location waypointLocation = new Location(eventWorld, waypoint.coordsX, waypoint.coordsY, waypoint.coordsZ);
-            double waypointDistance = eventLocation.distance(waypointLocation);
+            double dx = waypoint.coordsX + 0.5 - origin.getX();
+            double dz = waypoint.coordsZ + 0.5 - origin.getZ();
+            double distanceSquared = dx * dx + dz * dz;
 
-            if (waypointDistance < nearestYet) {
+            if (distanceSquared < nearestYet) {
                 nearestWaypoint = waypoint;
-                nearestYet = waypointDistance;
+                nearestYet = distanceSquared;
             }
         }
         if (nearestWaypoint == null) return;
 
-        EnderSignal enderEye = (EnderSignal) event.getEntity();
-        enderEye.setTargetLocation(nearestWaypoint.getLocation(eventWorld));
+        enderEye.setTargetLocation(nearestWaypoint.getLocation(world));
     }
 }
