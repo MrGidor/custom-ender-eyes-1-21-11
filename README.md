@@ -1,5 +1,8 @@
 # Custom-Ender-Eyes
 
+Ported to 1.21.11 for the Horizons Eternia SMP server.
+Feel free to use wherever you like, but credit the original author.
+
 ## Setup
 
 - Put the `.jar` in the plugins folder of your server
