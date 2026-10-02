@@ -26,7 +26,7 @@ public class EnderEyeRedirect implements Listener {
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent event) {
         if (this.config.getBoolean("target-strongholds")) return;
-        if (!event.getEntityType().equals(EntityType.ENDER_SIGNAL)) return;
+        if (!event.getEntityType().equals(EntityType.ENDER_PEARL)) return;
 
         String waypointStoragePath;
         switch(event.getEntity().getWorld().getEnvironment()) {
