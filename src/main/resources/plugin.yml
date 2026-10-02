@@ -1,7 +1,7 @@
 name: CustomEnderEyes
 version: "${project.version}"
 main: me.wholesome_seal.custom_ender_eyes.Main
-api-version: 1.19
+api-version: 1.21
 authors: [wholesome_seal]
 
 commands:
@@ -11,7 +11,7 @@ commands:
 
 permissions:
   customendereyes.endereye:
-    description: Permission to run all /endereye subcommands. Admin commmand
+    description: Permission to run all /endereye subcommands. Admin command
   customendereyes.*:
     description: Wildcard permission for all commands
     children:
